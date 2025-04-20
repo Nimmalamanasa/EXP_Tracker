@@ -1,23 +1,78 @@
-import { useForm } from "react-hook-form";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../services/api";
 
 function AddExpense() {
-  const { register, handleSubmit, reset } = useForm();
+  const [title, setTitle] = useState("");
+  const [amount, setAmount] = useState("");
+  const [date, setDate] = useState("");
+  const navigate = useNavigate();
 
-  const onSubmit = data => {
-    console.log("New Expense:", data);
-    // You can call your backend here with axios
-    reset();
+  const handleAddExpense = async (e) => {
+    e.preventDefault();
+    const token = localStorage.getItem("token");
+
+    try {
+      await api.post(
+        "/expenses",
+        { title, amount, date },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Failed to add expense", error);
+    }
   };
 
   return (
-    <div className="max-w-sm mx-auto mt-10 p-6 bg-white shadow rounded">
-      <h2 className="text-2xl mb-4 text-center font-semibold">Add Expense</h2>
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-        <input {...register("title")} type="text" placeholder="Expense Title" className="border p-2 rounded" required />
-        <input {...register("amount")} type="number" placeholder="Amount" className="border p-2 rounded" required />
-        <input {...register("date")} type="date" className="border p-2 rounded" required />
-        <button type="submit" className="bg-green-600 text-white p-2 rounded">Add Expense</button>
-      </form>
+    <div className="add-expense-wrapper">
+      <div className="add-expense-card">
+        <h2 className="add-expense-heading">Add Expense</h2>
+        <form onSubmit={handleAddExpense} className="add-expense-form">
+          <div className="add-expense-group">
+            <label htmlFor="title" className="add-expense-label">Title</label>
+            <input
+              type="text"
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="add-expense-input"
+              required
+            />
+          </div>
+
+          <div className="add-expense-group">
+            <label htmlFor="amount" className="add-expense-label">Amount</label>
+            <input
+              type="number"
+              id="amount"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              className="add-expense-input"
+              required
+            />
+          </div>
+
+          <div className="add-expense-group">
+            <label htmlFor="date" className="add-expense-label">Date</label>
+            <input
+              type="date"
+              id="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="add-expense-input"
+              required
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="add-expense-button"
+          >
+            Add Expense
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

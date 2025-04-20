@@ -1,21 +1,74 @@
-import { useForm } from "react-hook-form";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../services/api";
 
 function Login() {
-  const { register, handleSubmit } = useForm();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const onSubmit = data => {
-    console.log("Login Data:", data);
-    // axios.post('/login', data).then(...);
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError("");
+    setIsLoading(true);
+
+    try {
+      const response = await api.post("/auth/login", { email, password });
+      localStorage.setItem("token", response.data.token);
+      navigate("/dashboard");
+    } catch (error) {
+      console.error("Login failed", error);
+      setError("Invalid email or password.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
-    <div className="max-w-sm mx-auto mt-10 p-6 bg-white shadow rounded">
-      <h2 className="text-2xl mb-4 text-center font-semibold">Login</h2>
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-        <input {...register("email")} type="email" placeholder="Email" className="border p-2 rounded" required />
-        <input {...register("password")} type="password" placeholder="Password" className="border p-2 rounded" required />
-        <button type="submit" className="bg-blue-600 text-white p-2 rounded">Login</button>
-      </form>
+    <div className="login-wrapper">
+      <div className="login-card">
+        <h2 className="login-heading">Login</h2>
+        <form onSubmit={handleLogin} className="login-form">
+          <div className="login-group">
+            <label htmlFor="email" className="login-label">
+              Email
+            </label>
+            <input
+              type="email"
+              id="email"
+              name="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="login-input"
+              required
+            />
+          </div>
+          <div className="login-group">
+            <label htmlFor="password" className="login-label">
+              Password
+            </label>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="login-input"
+              required
+            />
+          </div>
+          {error && <div className="login-error">{error}</div>}
+          <button
+            type="submit"
+            className="login-button"
+            disabled={isLoading}
+          >
+            {isLoading ? "Logging in..." : "Login"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

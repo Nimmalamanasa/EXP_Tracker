@@ -1,19 +1,45 @@
-import { Link } from 'react-router-dom';
-
+import { Link, useNavigate } from "react-router-dom";
 function Navbar() {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    // Remove the token from localStorage
+    localStorage.removeItem("token");
+
+    // Redirect to the login page
+    navigate("/login");
+  };
+
   return (
-    <nav className="bg-blue-600 p-4 text-white flex justify-between items-center">
-      <h1 className="text-xl font-bold">Expense Tracker</h1>
-      <div className="space-x-4">
-        <Link to="/" className="hover:underline">Dashboard</Link>
-        <Link to="/expenses" className="hover:underline">Expenses</Link>
-        <Link to="/login" className="hover:underline">Login</Link>
-        <Link to="/add-expense" className="hover:underline">Add Expense</Link>
-        <Link to="/register" className="hover:underline">Register</Link>
+    <nav className="navbar">
+      <div className="navbar-container">
+        <Link to="/" className="navbar-brand">
+          Expense Tracker
+        </Link>
+        <div className="navbar-links">
+          {!localStorage.getItem("token") ? (
+            <>
+              <Link to="/login" className="navbar-link">
+                Login
+              </Link>
+              <Link to="/register" className="navbar-link">
+                Register
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link to="/dashboard" className="navbar-link">
+                Dashboard
+              </Link>
+              <button onClick={handleLogout} className="navbar-logout">
+                Logout
+              </button>
+            </>
+          )}
+        </div>
       </div>
     </nav>
   );
 }
 
 export default Navbar;
-
